@@ -2,7 +2,67 @@
 
 #Import Data
 
+setwd("C:/Users/ashish.silla/Downloads/TRAINING/R")
+#Importing the Data from local system
+Titanic_Train <- read.csv("train.csv", stringsAsFactors = FALSE)
+Titanic_Test <- read.csv("test.csv", stringsAsFactors = FALSE)
 
+#Doing Sanity Chacks on the data imported
+head(Titanic_Train)
+names(Titanic_Train)
+str(Titanic_Train)
+str(Titanic_Test)
+
+#Data cleaning / preparaion
+
+#Adding a extra column to specify the values are from which file
+Titanic_Test$IsTrainingSet <- FALSE
+Titanic_Train$IsTrainingSet <- TRUE
+
+#Adding the Survived column in the Training data set at the same position
+Survived <- NA
+Titanic_Test<- cbind(Titanic_Test,Survived)
+
+#Checking the colnames in both the sets matches each other or not
+names(Titanic_Test)%in%names(Titanic_Train)
+
+#Combining the both datasets
+Titanic_full <- rbind(Titanic_Test, Titanic_Train)
+str(Titanic_full)
+names(Titanic_full)
+tail(Titanic_full)
+
+#DATA preparton on Embarked, Age and other columns
+table(Titanic_full$Embarked)
+Titanic_full[Titanic_full$Embarked == '', "Embarked"] <- 'S'
+
+Age_adj <- median(Titanic_full$Age, na.rm = TRUE)
+Titanic_full[is.na(Titanic_full$Age),"Age"] <- Age_adj
+
+table(is.na(Titanic_full$Fare))
+fare_adj <- median(Titanic_full$Fare, na.rm = TRUE)
+Titanic_full[is.na(Titanic_full$Fare),"Fare"] <- fare_adj
+
+str(Titanic_full)
+table(Titanic_full$Survived)
+
+
+#Converting back to Facators or also called feature casting after data adjustments
+#in the given data set, feature 'Sex', 'Embarked', 'Pclass' should be factors
+
+Titanic_full$Pclass <- as.factor(Titanic_full$Pclass)
+Titanic_full$Sex <- as.factor(Titanic_full$Sex)
+Titanic_full$Embarked <- as.factor(Titanic_full$Embarked)
+
+#Splitting back the whole dataset back into two
+
+Titanic_Test <- Titanic_full[Titanic_full$IsTrainingSet==FALSE, ]
+Titanic_Train <- Titanic_full[Titanic_full$IsTrainingSet==TRUE, ]
+str(Titanic_Test)
+str(Titanic_Train)
+
+Titanic_Train$Survived <- as.factor(Titanic_Train$Survived)
+Titanic_Test$Survived <- as.factor(Titanic_Test$Survived)
 
 
 
