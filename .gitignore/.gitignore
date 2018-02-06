@@ -1,7 +1,3 @@
-
-
-#Import Data
-
 setwd("C:/Users/ashish.silla/Downloads/TRAINING/R")
 #Importing the Data from local system
 Titanic_Train <- read.csv("train.csv", stringsAsFactors = FALSE)
@@ -58,15 +54,32 @@ Titanic_full$Embarked <- as.factor(Titanic_full$Embarked)
 
 Titanic_Test <- Titanic_full[Titanic_full$IsTrainingSet==FALSE, ]
 Titanic_Train <- Titanic_full[Titanic_full$IsTrainingSet==TRUE, ]
-str(Titanic_Test)
-str(Titanic_Train)
-
 Titanic_Train$Survived <- as.factor(Titanic_Train$Survived)
 Titanic_Test$Survived <- as.factor(Titanic_Test$Survived)
 
+str(Titanic_Test)
+str(Titanic_Train)
 
 
+#Building predictor/model
 
+#selecting the features to build the model
+Survived_equation <- formula("Survived ~ Pclass + Sex + Age + Embarked + Fare + SibSp + Parch")
 
+install.packages("randomForest")
+
+Features_equation <- "Pclass + Sex + Age + Embarked + Fare + SibSp + Parch"
+
+Titanic_Model <- randomForest(Survived_equation, data = Titanic_Train, mtry = 3, nodesize = 0.01*nrow(Titanic_Train))
+
+Survived_Test <- predict(Titanic_Model, newdata = Titanic_Test)
+Survived_Trainin <- predict(Titanic_Model, newdata = Titanic_Train)
+
+#Measuring the effectiveness of the model 
+library("caret")
+library("e1071")
+
+confusionMatrix(Survived_Trainin, Titanic_Train$Survived)
+  
 
 
