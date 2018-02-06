@@ -28,27 +28,59 @@ str(Titanic_full)
 names(Titanic_full)
 tail(Titanic_full)
 
-#DATA preparton on Embarked, Age and other columns
-table(Titanic_full$Embarked)
-Titanic_full[Titanic_full$Embarked == '', "Embarked"] <- 'S'
-
-Age_adj <- median(Titanic_full$Age, na.rm = TRUE)
-Titanic_full[is.na(Titanic_full$Age),"Age"] <- Age_adj
-
-table(is.na(Titanic_full$Fare))
-fare_adj <- median(Titanic_full$Fare, na.rm = TRUE)
-Titanic_full[is.na(Titanic_full$Fare),"Fare"] <- fare_adj
-
-str(Titanic_full)
-table(Titanic_full$Survived)
-
-
 #Converting back to Facators or also called feature casting after data adjustments
 #in the given data set, feature 'Sex', 'Embarked', 'Pclass' should be factors
 
 Titanic_full$Pclass <- as.factor(Titanic_full$Pclass)
 Titanic_full$Sex <- as.factor(Titanic_full$Sex)
 Titanic_full$Embarked <- as.factor(Titanic_full$Embarked)
+
+#DATA preparton on Embarked, Age and other columns
+
+table(Titanic_full$Embarked)
+Titanic_full[Titanic_full$Embarked == '', "Embarked"] <- 'S'
+
+
+#Age_adj <- median(Titanic_full$Age, na.rm = TRUE)
+
+table(is.na(Titanic_full$Age))
+boxplot(Titanic_full$Age)
+
+age_outlier <- boxplot.stats(Titanic_full$Age)$stats[5]
+age_filter <- Titanic_full[Titanic_full$Age < age_outlier, ]
+names(age_filter)
+
+age_formula <- "Age ~ SibSp + Parch + Sex + Embarked + Fare"
+age_model <- lm(age_formula, data = age_filter)
+
+table(is.na(Titanic_full$Age))
+age_rows <- Titanic_full[is.na(Titanic_full$Age), c("Fare", "Sex", "SibSp", "Parch", "Embarked")]
+age_predict <- predict(age_model, newdata =age_rows )
+
+
+Titanic_full[is.na(Titanic_full$Age),"Age"] <- age_predict
+
+
+table(is.na(Titanic_full$Fare))
+# fare_adj <- median(Titanic_full$Fare, na.rm = TRUE)
+boxplot(Titanic_full$Fare)
+fare_outlier<- boxplot.stats(Titanic_full$Fare)$stats[5]
+fare_filter <- Titanic_full[Titanic_full$Fare<fare_outlier, ]
+
+
+#Model to predict missing fare values
+fare_formula <- "Fare ~ Age + Pclass + Sex + SibSp + Parch + Embarked"
+
+fare_model <- lm(formula = fare_formula, data= fare_filter)
+
+fare_rows <- Titanic_full[is.na(Titanic_full$Fare),c("Age", "Pclass", "Sex", "SibSp", "Parch", "Embarked")]
+
+Titanic_full[is.na(Titanic_full$Fare),"Fare"] <- predict(fare_model, newdata = fare_rows)
+
+
+str(Titanic_full)
+table(Titanic_full$Survived)
+
 
 #Splitting back the whole dataset back into two
 
@@ -75,7 +107,6 @@ Titanic_Model <- randomForest(Survived_equation, data = Titanic_Train, mtry = 3,
 Survived_Test <- predict(Titanic_Model, newdata = Titanic_Test)
 Survived_Trainin <- predict(Titanic_Model, newdata = Titanic_Train)
 
-#Measuring the effectiveness of the model 
 library("caret")
 library("e1071")
 
