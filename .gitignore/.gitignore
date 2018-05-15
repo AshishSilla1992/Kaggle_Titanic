@@ -1,4 +1,4 @@
-setwd("C:/Users/ashish.silla/Downloads/TRAINING/R")
+setwd("F:/Analytics/Analytics/Kaggle/Titanic")
 #Importing the Data from local system
 Titanic_Train <- read.csv("train.csv", stringsAsFactors = FALSE)
 Titanic_Test <- read.csv("test.csv", stringsAsFactors = FALSE)
@@ -60,12 +60,11 @@ age_predict <- predict(age_model, newdata =age_rows )
 
 
 Titanic_full[is.na(Titanic_full$Age),"Age"] <- age_predict
-
-
-table(is.na(Titanic_full$Fare))
+table(is.na(Titanic_full$Age))
 
 # fare_adj <- median(Titanic_full$Fare, na.rm = TRUE) or
 #Model to predict missing fare values
+table(is.na(Titanic_full$Fare))
 
 boxplot(Titanic_full$Fare)
 fare_outlier<- boxplot.stats(Titanic_full$Fare)$stats[5]
@@ -80,7 +79,7 @@ fare_model <- lm(formula = fare_formula, data= fare_filter)
 fare_rows <- Titanic_full[is.na(Titanic_full$Fare),c("Age", "Pclass", "Sex", "SibSp", "Parch", "Embarked")]
 
 Titanic_full[is.na(Titanic_full$Fare),"Fare"] <- predict(fare_model, newdata = fare_rows)
-
+table(is.na(Titanic_full$Fare))
 
 str(Titanic_full)
 table(Titanic_full$Survived)
@@ -102,7 +101,9 @@ str(Titanic_Train)
 #selecting the features to build the model
 Survived_equation <- formula("Survived ~ Pclass + Sex + Age + Embarked + Fare + SibSp + Parch")
 
-install.packages("randomForest")
+#install.packages("randomForest")
+#install.packages(c("caret","e1071"))
+library("randomForest")
 library("caret")
 library("e1071")
 
@@ -114,6 +115,31 @@ Survived_Trainin <- predict(Titanic_Model, newdata = Titanic_Train)
 Survived_Test <- predict(Titanic_Model, newdata = Titanic_Test)
 
 confusionMatrix(Survived_Trainin, Titanic_Train$Survived)
-  
+
+
+
+Confusion Matrix and Statistics
+
+#           Reference
+#Prediction   0   1
+#          0 527  60
+#          1  22 282
+# 
+# Accuracy : 0.908           
+# 95% CI : (0.8871, 0.9261)
+# No Information Rate : 0.6162          
+# P-Value [Acc > NIR] : < 2.2e-16       
+# 
+# Kappa : 0.8013          
+# Mcnemar's Test P-Value : 4.389e-05       
+#                                           
+#             Sensitivity : 0.9599          
+#             Specificity : 0.8246          
+#          Pos Pred Value : 0.8978          
+#          Neg Pred Value : 0.9276          
+#              Prevalence : 0.6162          
+#          Detection Rate : 0.5915          
+#    Detection Prevalence : 0.6588          
+#       Balanced Accuracy : 0.8922 
 
 
