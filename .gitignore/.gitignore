@@ -35,13 +35,14 @@ Titanic_full$Pclass <- as.factor(Titanic_full$Pclass)
 Titanic_full$Sex <- as.factor(Titanic_full$Sex)
 Titanic_full$Embarked <- as.factor(Titanic_full$Embarked)
 
-#DATA preparton on Embarked, Age and other columns
+#DATA preparton(Dealing with Missing Values) on Embarked, Age and other columns
 
 table(Titanic_full$Embarked)
 Titanic_full[Titanic_full$Embarked == '', "Embarked"] <- 'S'
 
 
-#Age_adj <- median(Titanic_full$Age, na.rm = TRUE)
+#Age_adj <- median(Titanic_full$Age, na.rm = TRUE) or
+#Model to predict missing age values
 
 table(is.na(Titanic_full$Age))
 boxplot(Titanic_full$Age)
@@ -62,13 +63,16 @@ Titanic_full[is.na(Titanic_full$Age),"Age"] <- age_predict
 
 
 table(is.na(Titanic_full$Fare))
-# fare_adj <- median(Titanic_full$Fare, na.rm = TRUE)
+
+# fare_adj <- median(Titanic_full$Fare, na.rm = TRUE) or
+#Model to predict missing fare values
+
 boxplot(Titanic_full$Fare)
 fare_outlier<- boxplot.stats(Titanic_full$Fare)$stats[5]
 fare_filter <- Titanic_full[Titanic_full$Fare<fare_outlier, ]
 
 
-#Model to predict missing fare values
+
 fare_formula <- "Fare ~ Age + Pclass + Sex + SibSp + Parch + Embarked"
 
 fare_model <- lm(formula = fare_formula, data= fare_filter)
@@ -99,16 +103,15 @@ str(Titanic_Train)
 Survived_equation <- formula("Survived ~ Pclass + Sex + Age + Embarked + Fare + SibSp + Parch")
 
 install.packages("randomForest")
+library("caret")
+library("e1071")
 
 Features_equation <- "Pclass + Sex + Age + Embarked + Fare + SibSp + Parch"
 
 Titanic_Model <- randomForest(Survived_equation, data = Titanic_Train, mtry = 3, nodesize = 0.01*nrow(Titanic_Train))
 
-Survived_Test <- predict(Titanic_Model, newdata = Titanic_Test)
 Survived_Trainin <- predict(Titanic_Model, newdata = Titanic_Train)
-
-library("caret")
-library("e1071")
+Survived_Test <- predict(Titanic_Model, newdata = Titanic_Test)
 
 confusionMatrix(Survived_Trainin, Titanic_Train$Survived)
   
